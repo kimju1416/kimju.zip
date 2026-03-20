@@ -449,7 +449,7 @@ async function send(){
     if(!data.error) history.push({ role: 'model', parts: [{ text: data.reply }] });
   } catch(e) {
     hideTyping();
-    addMsg('bot', fmt('⚠️ 서버에 연결할 수 없어요.\nGAS 파일 안의 <code>GAS_URL</code> 을 확인해 주세요!'));
+    addMsg('bot', fmt('⚠️ 오류가 발생했어요: ' + e.message));
   }
 
   loading = false;
