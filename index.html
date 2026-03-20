@@ -436,9 +436,10 @@ async function send(){
   history.push({ role: 'user', parts: [{ text }] });
 
   try {
+    const recentHistory = history.slice(-5, -1); // 최근 4개만 전송
     const params = new URLSearchParams({
       message: text,
-      history: JSON.stringify(history.slice(0, -1))
+      history: JSON.stringify(recentHistory)
     });
     const res = await fetch(GAS_URL + '?' + params.toString());
     const data = await res.json();
