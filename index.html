@@ -356,6 +356,27 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbwmfd74SdyJXU2GPtuxUGSY
 let history = [];
 let loading = false;
 
+function jsonp(url, params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now();
+    params.callback = cbName;
+    const query = new URLSearchParams(params).toString();
+    const script = document.createElement('script');
+    script.src = url + '?' + query;
+    window[cbName] = function(data) {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = function() {
+      delete window[cbName];
+      document.body.removeChild(script);
+      reject(new Error('JSONP 요청 실패'));
+    };
+    document.body.appendChild(script);
+  });
+}
+
 function toggleNotice(){
   const nb = document.getElementById('nb');
   const arr = document.getElementById('arr');
@@ -436,20 +457,18 @@ async function send(){
   history.push({ role: 'user', parts: [{ text }] });
 
   try {
-    const recentHistory = history.slice(-5, -1); // 최근 4개만 전송
-    const params = new URLSearchParams({
+    const recentHistory = history.slice(-5, -1);
+    const reply = await jsonp(GAS_URL, {
       message: text,
       history: JSON.stringify(recentHistory)
     });
-    const res = await fetch(GAS_URL + '?' + params.toString());
-    const data = await res.json();
     hideTyping();
-    const reply = data.error ? '⚠️ 오류: ' + data.error : data.reply;
-    addMsg('bot', fmt(reply));
-    if(!data.error) history.push({ role: 'model', parts: [{ text: data.reply }] });
+    const replyText = reply.error ? '⚠️ 오류: ' + reply.error : reply.reply;
+    addMsg('bot', fmt(replyText));
+    if(!reply.error) history.push({ role: 'model', parts: [{ text: reply.reply }] });
   } catch(e) {
     hideTyping();
-    addMsg('bot', fmt('⚠️ 오류가 발생했어요: ' + e.message));
+    addMsg('bot', fmt('⚠️ 오류: ' + e.message));
   }
 
   loading = false;
