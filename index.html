@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kimju.zip 도우미</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;
+  --surface:#0d1117;
+  --surface2:#131920;
+  --surface3:#1a2332;
+  --border:#1e2d3d;
+  --border2:#243447;
+  --accent:#00d4ff;
+  --accent2:#39ff85;
+  --accent3:#ff6b35;
+  --text:#cdd9e5;
+  --text-dim:#768390;
+  --text-bright:#e6edf3;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  font-size:15px;
+}
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.012) 2px,rgba(0,212,255,0.012) 4px);
+  pointer-events:none;z-index:999;
+}
+.top-line{
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),var(--accent3),transparent);
+  flex-shrink:0;
+  animation:lp 3s ease-in-out infinite;
+}
+@keyframes lp{0%,100%{opacity:0.7}50%{opacity:1}}
+
+header{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:10;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:34px;height:34px;
+  background:var(--surface3);
+  border:1px solid var(--accent);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  color:var(--accent);line-height:1.3;text-align:center;
+  box-shadow:0 0 12px rgba(0,212,255,0.2);
+}
+.logo-texts{display:flex;flex-direction:column;gap:1px}
+.logo-name{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--accent);letter-spacing:0.5px}
+.logo-sub{font-size:12px;color:var(--text-dim);letter-spacing:0.3px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.online-badge{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(57,255,133,0.08);
+  border:1px solid rgba(57,255,133,0.25);
+  border-radius:20px;padding:4px 12px;
+  font-family:var(--mono);font-size:12px;color:var(--accent2);
+}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.main{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  max-width:700px;width:100%;margin:0 auto;padding:0 14px;
+  position:relative;z-index:5;
+}
+
+.notice{
+  flex-shrink:0;margin:12px 0 6px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-left:2px solid var(--accent3);
+  border-radius:8px;overflow:hidden;
+}
+.notice-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 12px;cursor:pointer;
+}
+.notice-hdr:hover{background:rgba(255,255,255,0.02)}
+.notice-hdr-l{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--accent3)}
+.notice-arrow{font-size:11px;color:var(--text-dim);transition:transform 0.3s;font-family:var(--mono)}
+.notice-arrow.open{transform:rotate(180deg)}
+.notice-body{
+  border-top:1px solid var(--border);
+  padding:12px 16px;display:none;
+  font-size:14px;line-height:1.9;color:var(--text-dim);
+  background:rgba(0,0,0,0.2);
+}
+.notice-body.open{display:block}
+.n-row{display:flex;gap:8px;margin-bottom:6px}
+.n-num{font-family:var(--mono);font-size:12px;color:var(--accent3);min-width:18px}
+.n-row b{color:var(--text);font-weight:500}
+.notice-foot{
+  margin-top:8px;padding-top:8px;
+  border-top:1px dashed var(--border);
+  font-size:11px;color:var(--text-dim);
+}
+
+.chat{
+  flex:1;min-height:0;overflow-y:auto;
+  padding:12px 0 6px;
+  display:flex;flex-direction:column;gap:12px;
+  scroll-behavior:smooth;
+}
+.chat::-webkit-scrollbar{width:3px}
+.chat::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.welcome{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;text-align:center;padding:24px 16px;
+  animation:fadeUp 0.5s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.welcome-ring{
+  width:64px;height:64px;border-radius:20px;
+  background:var(--surface3);
+  border:1px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  box-shadow:0 0 30px rgba(0,212,255,0.15),inset 0 0 20px rgba(0,212,255,0.05);
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.welcome-title{font-size:22px;font-weight:700;color:var(--text-bright);line-height:1.4}
+.welcome-title span{color:var(--accent);font-family:var(--mono)}
+.welcome-desc{font-size:15px;color:var(--text-dim);line-height:1.9;max-width:420px;word-break:keep-all}
+.chips-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.chips-label{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px}
+.chip{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:7px 16px;font-size:13px;color:var(--text-dim);
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.06)}
+
+.msg{display:flex;gap:8px;animation:msgIn 0.25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.av{
+  width:28px;height:28px;border-radius:8px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:13px;margin-top:2px;
+}
+.av.bot{background:var(--surface3);border:1px solid var(--accent);box-shadow:0 0 8px rgba(0,212,255,0.15)}
+.av.uav{background:var(--surface2);border:1px solid var(--border2)}
+.bubble{
+  max-width:82%;padding:12px 16px;
+  border-radius:12px;font-size:15px;line-height:1.85;word-break:keep-all;
+}
+.msg.bot .bubble{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-bottom-left-radius:3px;color:var(--text);
+}
+.msg.user .bubble{
+  background:var(--surface3);border:1px solid var(--accent);
+  border-bottom-right-radius:3px;color:var(--text-bright);
+  box-shadow:0 0 12px rgba(0,212,255,0.08);
+}
+.bubble strong{color:var(--accent);font-weight:500}
+.bubble code{
+  background:rgba(0,212,255,0.08);padding:1px 5px;border-radius:4px;
+  font-family:var(--mono);font-size:11px;color:var(--accent2);
+}
+.bubble ol,.bubble ul{padding-left:18px;margin-top:4px}
+.bubble li{margin-bottom:3px}
+
+.typing-wrap{display:flex;gap:8px;align-items:flex-start;animation:msgIn 0.25s ease}
+.typing-bubble{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:12px;border-bottom-left-radius:3px;
+  padding:12px 16px;display:flex;gap:4px;align-items:center;
+}
+.td{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:td 1.4s ease-in-out infinite}
+.td:nth-child(2){animation-delay:0.2s;background:var(--accent2)}
+.td:nth-child(3){animation-delay:0.4s;background:var(--accent3)}
+@keyframes td{0%,60%,100%{transform:scale(1);opacity:0.3}30%{transform:scale(1.4);opacity:1}}
+
+.input-area{flex-shrink:0;padding:8px 0 14px}
+.input-box{
+  display:flex;gap:8px;align-items:flex-end;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:12px;padding:9px 10px;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.input-box:focus-within{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(0,212,255,0.08);
+}
+#userInput{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text-bright);font-family:var(--sans);
+  font-size:15px;line-height:1.6;resize:none;
+  max-height:110px;min-height:24px;
+}
+#userInput::placeholder{color:var(--text-dim)}
+.send-btn{
+  width:34px;height:34px;border-radius:9px;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#080c10;font-size:16px;font-weight:700;
+  transition:all 0.2s;flex-shrink:0;
+  box-shadow:0 0 14px rgba(0,212,255,0.3);
+}
+.send-btn:hover:not(:disabled){background:#33ddff;box-shadow:0 0 20px rgba(0,212,255,0.5)}
+.send-btn:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none}
+.confirm-btn{
+  display:block;width:100%;margin-top:12px;
+  background:var(--accent);border:none;border-radius:8px;
+  padding:10px;cursor:pointer;
+  font-family:var(--sans);font-size:13px;font-weight:700;
+  color:#080c10;letter-spacing:0.3px;
+  box-shadow:0 0 16px rgba(0,212,255,0.3);
+  transition:all 0.2s;
+  animation:cpulse 2s ease-in-out infinite;
+}
+.confirm-btn:hover{background:#33ddff;box-shadow:0 0 28px rgba(0,212,255,0.6);animation:none}
+@keyframes cpulse{0%,100%{box-shadow:0 0 12px rgba(0,212,255,0.25)}50%{box-shadow:0 0 28px rgba(0,212,255,0.6)}}
+.input-area.locked{opacity:0.3;pointer-events:none}
+.locked-hint{
+  text-align:center;font-family:var(--mono);font-size:12px;
+  color:var(--accent3);letter-spacing:0.5px;
+  padding-bottom:5px;
+}
+
+.footer{
+  flex-shrink:0;text-align:center;
+  font-family:var(--mono);font-size:11px;color:var(--text-dim);
+  padding:6px;letter-spacing:0.5px;
+}
+.footer span{color:var(--accent);opacity:0.7}
+
+@media (max-width: 600px) {
+  body{font-size:14px}
+  header{padding:10px 14px}
+  .logo-mark{width:30px;height:30px;font-size:8px}
+  .logo-name{font-size:15px}
+  .logo-sub{font-size:11px}
+  .online-badge{font-size:11px;padding:3px 9px}
+  .main{padding:0 10px}
+  .notice-hdr-l{font-size:12px}
+  .notice-body{font-size:13px;padding:10px}
+  .welcome-ring{width:54px;height:54px;font-size:24px}
+  .welcome-title{font-size:18px}
+  .welcome-desc{font-size:13px}
+  .chip{font-size:12px;padding:6px 13px}
+  .bubble{font-size:14px;padding:10px 13px}
+  .av{width:26px;height:26px;font-size:12px}
+  #userInput{font-size:14px}
+  .send-btn{width:32px;height:32px;font-size:15px}
+  .confirm-btn{font-size:13px;padding:10px}
+  .locked-hint{font-size:11px}
+  .footer{font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="top-line"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">kim<br>ju.z</div>
+    <div class="logo-texts">
+      <div class="logo-name">kimju.zip</div>
+      <div class="logo-sub">에듀테크 나눔 도우미</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-badge"><div class="dot"></div>온라인</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="notice">
+    <div class="notice-hdr" onclick="toggleNotice()">
+      <div class="notice-hdr-l">⚠ 먼저 읽어주세요 — 문제해결 가이드</div>
+      <span class="notice-arrow open" id="arr">▲</span>
+    </div>
+    <div class="notice-body open" id="nb">
+      <div class="n-row"><span class="n-num">1.</span><span>주소는 <b>PC에서 직접 복사-붙여넣기</b> 하세요. 대소문자 구분됩니다.</span></div>
+      <div class="n-row"><span class="n-num">2.</span><span>그래도 안 되면 <b>크롬 캐시 삭제</b> 후 새로고침 해보세요.</span></div>
+      <div class="n-row"><span class="n-num">3.</span><span><b>학교 구글 계정</b>은 이용 제한이 있을 수 있어요. 개인 계정으로 시도해보세요.</span></div>
+      <div class="n-row"><span class="n-num">4.</span><span>구글 계정 <b>용량이 가득 찼을 경우</b> 오류가 납니다. Drive에서 확인해보세요.</span></div>
+      <div class="n-row"><span class="n-num">5.</span><span><b>안전하지 않음 경고</b>는 정상이에요! 고급 → 계속 진행 클릭하면 됩니다.</span></div>
+      <div class="notice-foot">💬 위 방법으로도 안 되면 아래 챗봇에게 질문해 주세요!</div>
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmRead()">✅ 읽었어요! 챗봇 시작하기</button>
+    </div>
+  </div>
+
+  <div class="chat" id="chat">
+    <div class="welcome" id="welcome">
+      <div class="welcome-ring">🤖</div>
+      <div class="welcome-title">안녕하세요!<br><span>kimju.zip</span> 도우미입니다</div>
+      <div class="welcome-desc">GAS 배포 오류, 권한 문제, 안전하지 않음 경고 등<br>에듀테크 관련 질문을 편하게 물어보세요!</div>
+      <div class="chips-wrap">
+        <div class="chips-label">▸ 자주 묻는 질문</div>
+        <div class="chips">
+          <div class="chip" onclick="askChip(this)">🔐 안전하지 않음 경고</div>
+          <div class="chip" onclick="askChip(this)">⚙️ 배포 업데이트 안 됨</div>
+          <div class="chip" onclick="askChip(this)">🏫 학교 계정 오류</div>
+          <div class="chip" onclick="askChip(this)">🔑 권한 허용 방법</div>
+          <div class="chip" onclick="askChip(this)">📦 GAS 웹앱 배포 방법</div>
+          <div class="chip" onclick="askChip(this)">💾 구글 용량 확인</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area locked" id="inputArea">
+    <div class="locked-hint" id="lockedHint">⬆ 위 가이드를 먼저 읽어주세요!</div>
+    <div class="input-box">
+      <textarea id="userInput"
+        placeholder="질문을 입력하세요... (Enter 전송 / Shift+Enter 줄바꿈)"
+        rows="1"
+        onkeydown="onKey(event)"
+        oninput="resize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="send()">↑</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">Powered by <span>Gemini AI</span> · kimju.zip 에듀테크 나눔</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// GAS 웹앱 URL을 여기에 입력하세요
+// 배포 후 이 한 줄만 수정하면 됩니다!
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwmfd74SdyJXU2GPtuxUGSYu3AQUnFWaUj-PwvSDDmEKzEDV9fdxHT2l2rVdyj12EaE2A/exec";
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+let history = [];
+let loading = false;
+
+function toggleNotice(){
+  const nb = document.getElementById('nb');
+  const arr = document.getElementById('arr');
+  const open = nb.classList.toggle('open');
+  arr.classList.toggle('open', open);
+  arr.textContent = open ? '▲' : '▼';
+}
+
+function confirmRead(){
+  // 가이드 접기
+  const nb = document.getElementById('nb');
+  const arr = document.getElementById('arr');
+  nb.classList.remove('open');
+  arr.classList.remove('open');
+  arr.textContent = '▼';
+  // 입력창 잠금 해제
+  document.getElementById('inputArea').classList.remove('locked');
+  document.getElementById('lockedHint').style.display = 'none';
+  document.getElementById('userInput').focus();
+}
+
+function removeWelcome(){
+  const w = document.getElementById('welcome');
+  if(w) w.remove();
+}
+
+function addMsg(role, html){
+  removeWelcome();
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const av = document.createElement('div');
+  av.className = 'av ' + (role === 'bot' ? 'bot' : 'uav');
+  av.textContent = role === 'bot' ? '🤖' : '👤';
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.innerHTML = html;
+  div.appendChild(av);
+  div.appendChild(b);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function fmt(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+}
+
+function showTyping(){
+  removeWelcome();
+  const chat = document.getElementById('chat');
+  const w = document.createElement('div');
+  w.className = 'typing-wrap'; w.id = 'typing';
+  const av = document.createElement('div');
+  av.className = 'av bot'; av.textContent = '🤖';
+  const b = document.createElement('div');
+  b.className = 'typing-bubble';
+  b.innerHTML = '<div class="td"></div><div class="td"></div><div class="td"></div>';
+  w.appendChild(av); w.appendChild(b);
+  chat.appendChild(w);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping(){ const t = document.getElementById('typing'); if(t) t.remove(); }
+
+async function send(){
+  if(loading) return;
+  const inp = document.getElementById('userInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  loading = true;
+  document.getElementById('sendBtn').disabled = true;
+  addMsg('user', fmt(text));
+  showTyping();
+  history.push({ role: 'user', parts: [{ text }] });
+
+  try {
+    const params = new URLSearchParams({
+      message: text,
+      history: JSON.stringify(history.slice(0, -1))
+    });
+    const res = await fetch(GAS_URL + '?' + params.toString());
+    const data = await res.json();
+    hideTyping();
+    const reply = data.error ? '⚠️ 오류: ' + data.error : data.reply;
+    addMsg('bot', fmt(reply));
+    if(!data.error) history.push({ role: 'model', parts: [{ text: data.reply }] });
+  } catch(e) {
+    hideTyping();
+    addMsg('bot', fmt('⚠️ 서버에 연결할 수 없어요.\nGAS 파일 안의 <code>GAS_URL</code> 을 확인해 주세요!'));
+  }
+
+  loading = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('userInput').focus();
+}
+
+function askChip(el){
+  document.getElementById('userInput').value = el.textContent.trim();
+  send();
+}
+
+function onKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+}
+
+function resize(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+</script>
+</body>
+</html>
