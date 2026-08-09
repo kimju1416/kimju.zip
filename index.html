@@ -190,8 +190,17 @@ header{
   background:rgba(0,212,255,0.08);padding:1px 5px;border-radius:4px;
   font-family:var(--mono);font-size:11px;color:var(--accent2);
 }
-.bubble ol,.bubble ul{padding-left:18px;margin-top:4px}
+.bubble ol,.bubble ul{padding-left:20px;margin:4px 0 8px}
 .bubble li{margin-bottom:3px}
+.bubble li>ol,.bubble li>ul{margin:3px 0 3px}
+.bubble p{margin:0 0 9px}
+.bubble p:last-child{margin-bottom:0}
+.bubble h4{
+  font-size:15px;font-weight:700;color:var(--accent2);
+  margin:14px 0 6px;letter-spacing:0.2px;
+}
+.bubble h4:first-child{margin-top:0}
+.bubble hr{border:none;border-top:1px solid var(--border2);margin:12px 0}
 
 .typing-wrap{display:flex;gap:8px;align-items:flex-start;animation:msgIn 0.25s ease}
 .typing-bubble{
@@ -405,32 +414,70 @@ function esc(s){
 function fmt(text){
   const lines = esc(text).split('\n');
   let html = '';
-  let listBuf = [];
-  let listTag = null;
-  const flushList = () => {
-    if(listBuf.length){
-      html += '<' + listTag + '>' + listBuf.map(li => '<li>' + li + '</li>').join('') + '</' + listTag + '>';
-      listBuf = []; listTag = null;
+  let para = [];
+  const stack = [];   // 열려 있는 목록: {tag, indent}
+
+  const flushPara = () => {
+    if(para.length){ html += '<p>' + para.join('<br>') + '</p>'; para = []; }
+  };
+  const closeLists = (toIndent) => {
+    while(stack.length && (toIndent === undefined || stack[stack.length-1].indent > toIndent)){
+      const s = stack.pop();
+      html += '</' + s.tag + '>' + (s.nested ? '</li>' : '');
     }
   };
+  // 중첩 목록은 바로 앞 <li> 안으로 넣는다
+  const openList = (tag, indent) => {
+    const nested = stack.length > 0;
+    if(nested && html.endsWith('</li>')) html = html.slice(0, -5);
+    stack.push({ tag, indent, nested });
+    html += '<' + tag + '>';
+  };
+
   for(const raw of lines){
-    const numbered = raw.match(/^\s*\d+[.)]\s+(.*)$/);
-    const bulleted = raw.match(/^\s*[-*]\s+(.*)$/);
-    if(numbered){
-      if(listTag !== 'ol'){ flushList(); listTag = 'ol'; }
-      listBuf.push(numbered[1]);
-    } else if(bulleted){
-      if(listTag !== 'ul'){ flushList(); listTag = 'ul'; }
-      listBuf.push(bulleted[1]);
-    } else {
-      flushList();
-      html += (html ? '<br>' : '') + raw;
+    // 빈 줄 — 문단은 끊고, 목록은 유지(항목 사이 빈 줄이 흔함)
+    if(!raw.trim()){ flushPara(); continue; }
+
+    // 구분선
+    if(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(raw)){
+      flushPara(); closeLists(); html += '<hr>'; continue;
     }
+
+    // 제목(#, ##, ### …)
+    const heading = raw.match(/^\s*#{1,6}\s+(.*)$/);
+    if(heading){
+      flushPara(); closeLists(); html += '<h4>' + heading[1] + '</h4>'; continue;
+    }
+
+    // 목록 항목 (들여쓰기로 중첩 처리)
+    const item = raw.match(/^(\s*)(\d+[.)]|[-*•])\s+(.*)$/);
+    if(item){
+      flushPara();
+      const indent = item[1].replace(/\t/g, '    ').length;
+      const tag = /\d/.test(item[2]) ? 'ol' : 'ul';
+      closeLists(indent);
+      const top = stack[stack.length-1];
+      if(!top || top.indent < indent){
+        openList(tag, indent);
+      } else if(top.tag !== tag){
+        const s = stack.pop();
+        html += '</' + s.tag + '>' + (s.nested ? '</li>' : '');
+        openList(tag, indent);
+      }
+      html += '<li>' + item[3] + '</li>';
+      continue;
+    }
+
+    // 일반 문단
+    closeLists();
+    para.push(raw.trim());
   }
-  flushList();
+  flushPara();
+  closeLists();
+
   return html
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+?)`/g, '<code>$1</code>')
     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--accent)">$1</a>');
 }
 
@@ -467,27 +514,48 @@ async function send(overrideText){
   showTyping();
   history.push({ role: 'user', parts: [{ text }] });
 
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120000);
+
   try{
     const res = await fetch(GAS_URL, {
       method: 'POST',
+      signal: ctrl.signal,
       body: JSON.stringify({
         message: text,
-        history: history.slice(-5, -1)
+        history: history.slice(-9, -1)
       })
     });
-    const data = await res.json();
+
+    let data;
+    try{
+      data = JSON.parse(await res.text());
+    } catch(parseErr) {
+      throw new Error('서버가 이상한 응답을 보냈어요. 잠시 후 다시 시도해 주세요.');
+    }
+
     hideTyping();
     if(data.error){
       history.pop();
-      addErrorMsg('⚠️ 오류: ' + data.error, text);
+      addErrorMsg('⚠️ ' + data.error, text);
     } else {
-      addMsg('bot', fmt(data.reply));
+      let html = fmt(data.reply);
+      if(data.truncated){
+        html += '<div style="margin-top:6px;font-size:12px;color:var(--text-dim)">답변이 길어서 여기서 끊겼어요.</div>'
+             +  '<button class="retry-btn" onclick="continueLast()">↳ 이어서 답변받기</button>';
+      }
+      addMsg('bot', html);
       history.push({ role: 'model', parts: [{ text: data.reply }] });
     }
   } catch(err) {
     hideTyping();
     history.pop();
-    addErrorMsg('⚠️ 오류: ' + err.message, text);
+    const msg = (err.name === 'AbortError')
+      ? '답변이 너무 오래 걸려요. 잠시 후 다시 시도해 주세요.'
+      : (err.message === 'Failed to fetch' ? '인터넷 연결을 확인해 주세요.' : err.message);
+    addErrorMsg('⚠️ ' + msg, text);
+  } finally {
+    clearTimeout(timer);
   }
 
   loading = false;
@@ -504,6 +572,10 @@ function addErrorMsg(message, retryText){
 
 function retryLast(){
   if(lastFailedText) send(lastFailedText);
+}
+
+function continueLast(){
+  send('방금 답변이 중간에서 끊겼어요. 끊긴 부분부터 이어서 계속 써주세요. 인사말은 생략하고 바로 이어서요.');
 }
 
 function askChip(el){
