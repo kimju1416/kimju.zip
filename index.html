@@ -93,19 +93,26 @@ header{
   position:relative;z-index:5;
 }
 
+/* 접혀 있을 때는 조용히 두고, 펼쳤을 때만 주황으로 살립니다.
+   챗봇이 GAS 말고 TD2·유콜·쌤콜까지 다루게 돼서, 첫 화면에서 이 안내가
+   가장 강한 색으로 시선을 먼저 가져가지 않도록 위계를 낮췄습니다. */
 .notice{
   flex-shrink:0;margin:12px 0 6px;
   background:var(--surface2);
-  border:1px solid var(--border2);
-  border-left:2px solid var(--accent3);
+  border:1px solid var(--border);
+  border-left:2px solid var(--border2);
   border-radius:8px;overflow:hidden;
+  transition:border-left-color 0.25s;
 }
+.notice.open{border-left-color:var(--accent3)}
 .notice-hdr{
   display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;cursor:pointer;
 }
 .notice-hdr:hover{background:rgba(255,255,255,0.02)}
-.notice-hdr-l{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--accent3)}
+.notice-hdr-l{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--text-dim);transition:color 0.25s}
+.notice:not(.open) .notice-hdr:hover .notice-hdr-l{color:var(--text)}
+.notice.open .notice-hdr-l{color:var(--accent3)}
 .notice-arrow{font-size:11px;color:var(--text-dim);transition:transform 0.3s;font-family:var(--mono)}
 .notice-arrow.open{transform:rotate(180deg)}
 .notice-body{
@@ -319,7 +326,7 @@ header{
 
   <div class="notice">
     <div class="notice-hdr" id="noticeHdr" onclick="toggleNotice()" tabindex="0" role="button" aria-expanded="false" aria-controls="nb" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleNotice()}">
-      <div class="notice-hdr-l">⚠ 안 될 때 먼저 확인 5가지 (탭하여 펼치기)</div>
+      <div class="notice-hdr-l">⚠ GAS 앱이 안 열릴 때 먼저 확인 5가지 (탭하여 펼치기)</div>
       <span class="notice-arrow" id="arr">▼</span>
     </div>
     <div class="notice-body" id="nb">
@@ -398,6 +405,9 @@ function toggleNotice(){
   arr.classList.toggle('open', open);
   arr.textContent = open ? '▲' : '▼';
   hdr.setAttribute('aria-expanded', open ? 'true' : 'false');
+  // 접혀 있을 땐 조용히, 펼쳤을 때만 주황 강조
+  const box = hdr.parentElement;
+  if(box) box.classList.toggle('open', open);
 }
 
 function removeWelcome(){
