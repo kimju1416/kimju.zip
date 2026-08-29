@@ -261,18 +261,17 @@ header{
   min-height:36px;
 }
 .retry-btn:hover{background:rgba(255,107,53,0.2)}
+/* 안내를 닫는 버튼이라 안내 자체보다 강해질 이유가 없습니다.
+   꽉 찬 형광 + 맥박 애니메이션을 걷어내고 칩과 같은 외곽선 톤으로 맞췄습니다. */
 .confirm-btn{
   display:block;width:100%;margin-top:12px;
-  background:var(--accent);border:none;border-radius:8px;
+  background:transparent;border:1px solid var(--border2);border-radius:8px;
   padding:10px;cursor:pointer;
-  font-family:var(--sans);font-size:13px;font-weight:700;
-  color:#080c10;letter-spacing:0.3px;
-  box-shadow:0 0 16px rgba(0,212,255,0.3);
+  font-family:var(--sans);font-size:13px;font-weight:500;
+  color:var(--text-dim);letter-spacing:0.3px;
   transition:all 0.2s;
-  animation:cpulse 2s ease-in-out infinite;
 }
-.confirm-btn:hover{background:#33ddff;box-shadow:0 0 28px rgba(0,212,255,0.6);animation:none}
-@keyframes cpulse{0%,100%{box-shadow:0 0 12px rgba(0,212,255,0.25)}50%{box-shadow:0 0 28px rgba(0,212,255,0.6)}}
+.confirm-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.06)}
 
 .footer{
   flex-shrink:0;text-align:center;
@@ -336,7 +335,7 @@ header{
       <div class="n-row"><span class="n-num">4.</span><span>구글 계정 <b>용량이 가득 찼을 경우</b> 오류가 납니다. Drive에서 확인해보세요.</span></div>
       <div class="n-row"><span class="n-num">5.</span><span><b>안전하지 않음 경고</b>는 정상이에요! 고급 → 계속 진행 클릭하면 됩니다.</span></div>
       <div class="notice-foot">💬 위 방법으로도 안 되면 아래 챗봇에게 질문해 주세요!</div>
-      <button class="confirm-btn" id="confirmBtn" onclick="toggleNotice()">✅ 확인했어요, 접기</button>
+      <button class="confirm-btn" id="confirmBtn" onclick="toggleNotice()">확인했어요, 접기</button>
     </div>
   </div>
 
