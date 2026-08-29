@@ -143,16 +143,19 @@ header{
   width:64px;height:64px;border-radius:20px;
   background:var(--surface3);
   border:1px solid var(--accent);
-  display:flex;align-items:center;justify-content:center;font-size:28px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
   box-shadow:0 0 30px rgba(0,212,255,0.15),inset 0 0 20px rgba(0,212,255,0.05);
   animation:float 4s ease-in-out infinite;
 }
+.welcome-ring img{width:100%;height:100%;object-fit:cover;display:block}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .welcome-title{font-size:22px;font-weight:700;color:var(--text-bright);line-height:1.4}
 .welcome-title span{color:var(--accent);font-family:var(--mono)}
 .welcome-desc{font-size:15px;color:var(--text-dim);line-height:1.9;max-width:420px;word-break:keep-all}
 .chips-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
 .chips-label{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1px}
+.chips-label2{margin-top:6px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px}
 .chip{
   background:var(--surface2);border:1px solid var(--border2);
@@ -332,11 +335,18 @@ header{
 
   <div class="chat" id="chat">
     <div class="welcome" id="welcome">
-      <div class="welcome-ring">🤖</div>
+      <div class="welcome-ring"><img src="avatar.png" alt="" width="64" height="64" decoding="async"></div>
       <div class="welcome-title">안녕하세요!<br><span>kimju.zip</span> 도우미입니다</div>
-      <div class="welcome-desc">GAS 배포 오류, 권한 문제, 안전하지 않음 경고 등<br>에듀테크 관련 질문을 편하게 물어보세요!</div>
+      <div class="welcome-desc">GAS 배포 오류, TeacherDesk 2 사용법,<br>에듀테크 관련 질문을 편하게 물어보세요!</div>
       <div class="chips-wrap">
-        <div class="chips-label">▸ 자주 묻는 질문</div>
+        <div class="chips-label">▸ TeacherDesk 2</div>
+        <div class="chips">
+          <div class="chip" onclick="askChip(this)">✨ TD2 최신 버전과 새 기능</div>
+          <div class="chip" onclick="askChip(this)">⬇️ TD2 설치 방법</div>
+          <div class="chip" onclick="askChip(this)">🧩 위젯 배치하는 법</div>
+          <div class="chip" onclick="askChip(this)">📋 명렬 불러오기</div>
+        </div>
+        <div class="chips-label chips-label2">▸ GAS 배포</div>
         <div class="chips">
           <div class="chip" onclick="askChip(this)">🔐 안전하지 않음 경고</div>
           <div class="chip" onclick="askChip(this)">⚙️ 배포 업데이트 안 됨</div>
